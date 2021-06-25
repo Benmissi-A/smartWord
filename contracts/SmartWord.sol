@@ -1,4 +1,5 @@
-//SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: UNLICENSED
+
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
@@ -12,7 +13,7 @@ contract SmartWord is ERC721Enumerable, ERC721URIStorage, AccessControl {
     using Strings for uint256; // pour convertir un uint256 en string facilement
 
     struct Text {
-        uint256 textId; // id de notre item dans le jeu. id connu des développeurs.
+        uint256 textId; // id de notre texte . id connu des développeurs.
         string title;
         string content;
     }
@@ -22,6 +23,20 @@ contract SmartWord is ERC721Enumerable, ERC721URIStorage, AccessControl {
 
     constructor() ERC721("SmartWord", "Text") {
         _setupRole(MINTER_ROLE, msg.sender);
+    }
+    
+    function text(
+        address author,
+        string memory title,
+        string memory content,
+        uint256 textId
+    ) public onlyRole(MINTER_ROLE) returns (uint256) {
+        _textIds.increment();
+        uint256 currentId = _textIds.current();
+        _mint(author, currentId);
+        _setTokenURI(currentId, textId.toString()); // .toString() sur un uint256 grâce à la lib Strings
+        _texts[currentId] = Text(textId, title, content);
+        return currentId;
     }
 
     function getTextById(uint256 id) public view returns (Text memory) {
